@@ -1,0 +1,5 @@
+package isometries
+
+trait Transparent {
+
+}

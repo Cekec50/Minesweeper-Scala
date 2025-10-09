@@ -49,7 +49,7 @@ class MainFrameUI extends MainFrame {
   }
 
   def createLevel(): Unit = {
-    contents = new LevelCreatorPanel(this, new Board(List.fill(10, 10)("-")))
+    contents = new LevelCreatorPanel(this)
   }
 
 

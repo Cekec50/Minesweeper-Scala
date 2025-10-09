@@ -1,16 +1,33 @@
 package ui
 
+import controller.LevelCreatorController
 import model.Board
+
 import scala.swing._
 import scala.swing.BorderPanel.Position
+import scala.swing.event.ButtonClicked
 
-class LevelCreatorPanel(frame: MainFrameUI, board: Board) extends BorderPanel {
+class LevelCreatorPanel(frame: MainFrameUI) extends BorderPanel {
+  private var board = new Board(List.fill(10, 10)("-"))
+  private val levelCreatorController = new LevelCreatorController()
 
   // === Title ===
   private val title = new Label("Level Creator") {
     font = new Font("Arial", java.awt.Font.BOLD, 20)
     horizontalAlignment = Alignment.Center
   }
+  private val addRowButton = operationButton("Add Row")
+  private val addColumnButton = operationButton("Add Column")
+  private val deleteRowButton = operationButton("Delete Row")
+  private val deleteColumnButton = operationButton("Delete Column")
+  private val toggleMineButton = operationButton("Toggle mine")
+  private val clearAreaButton = operationButton("Clear Area")
+
+  private val applyButton = new Button("Apply")
+  private val inverseButton = new Button("Inverse")
+
+  private val saveLevelButton = new Button("Save Level")
+  private val backButton = new Button("Back")
 
   // === Difficulty selection ===
   private val beginner     = new RadioButton("Beginner")
@@ -39,14 +56,7 @@ class LevelCreatorPanel(frame: MainFrameUI, board: Board) extends BorderPanel {
       xAlignment = Alignment.Center
       border = Swing.EmptyBorder(5, 0, 5, 0)
     }
-    contents ++= Seq(
-      operationButton("Add row"),
-      operationButton("Add column"),
-      operationButton("Delete row"),
-      operationButton("Delete column"),
-      operationButton("Change field type"),
-      operationButton("Clear area")
-    )
+    contents ++= Seq(addRowButton, addColumnButton, deleteRowButton, deleteColumnButton, toggleMineButton, clearAreaButton)
     border = Swing.TitledBorder(Swing.EtchedBorder, "Map Editing")
     border = Swing.EmptyBorder(10, 10, 10, 10)
   }
@@ -64,8 +74,7 @@ class LevelCreatorPanel(frame: MainFrameUI, board: Board) extends BorderPanel {
     }
     contents += scrollPanel
     contents += new FlowPanel{
-      contents += new Button("Apply")
-      contents += new Button("Inverse")
+      contents ++= Seq(applyButton, inverseButton)
     }
     border = Swing.TitledBorder(Swing.EtchedBorder, "Isometries")
     border = Swing.EmptyBorder(10, 10, 10, 10)
@@ -81,13 +90,37 @@ class LevelCreatorPanel(frame: MainFrameUI, board: Board) extends BorderPanel {
 
   // === Bottom buttons ===
   private val buttonBar = new FlowPanel {
-    contents += new Button("Create Level")
-    contents += new Button("Back")
+    contents ++= Seq(saveLevelButton, backButton)
   }
-
+  private def setNewBoard(newBoard:Board): Unit = {
+    layout -= board
+    board = newBoard
+    layout(board)   = Position.Center
+    board.revalidate()
+    board.repaint()
+  }
   // === Layout ===
   layout(title)   = Position.North
   layout(westBox) = Position.West
   layout(buttonBar) = Position.South
   layout(board)   = Position.Center
+
+  // === Events ===
+  listenTo(addRowButton, addColumnButton, deleteRowButton, deleteColumnButton, toggleMineButton, clearAreaButton)
+  listenTo(applyButton, inverseButton)
+  listenTo(saveLevelButton, backButton)
+  reactions +={
+    case ButtonClicked(`addRowButton`) => setNewBoard(levelCreatorController.addRow(board))
+    case ButtonClicked(`addColumnButton`) => setNewBoard(levelCreatorController.addColumn(board))
+    case ButtonClicked(`deleteRowButton`) => setNewBoard(levelCreatorController.deleteRow(board))
+    case ButtonClicked(`deleteColumnButton`) => setNewBoard(levelCreatorController.deleteColumn(board))
+    case ButtonClicked(`toggleMineButton`) =>
+    case ButtonClicked(`clearAreaButton`) =>
+
+    case ButtonClicked(`applyButton`) =>
+    case ButtonClicked(`inverseButton`) =>
+
+    case ButtonClicked(`saveLevelButton`) =>
+    case ButtonClicked(`backButton`) => frame.showMenu()
+  }
 }

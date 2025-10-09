@@ -12,11 +12,11 @@ class Board(layout: List[List[String]]) extends GridBagPanel {
   val fields: List[List[Field]] =
     List.tabulate(rows, cols) { (r, c) =>
       layout(r)(c) match {
-        case "#" => new Field(true)
-        case "-" => new Field(false)
-        case "!" => new Field(true)
-        case "?" =>  new Field(false)
-        case "+" => new Field(false)
+        case "#" =>   new Field(true)   // MINE FIELD
+        case "-" =>   new Field(false)  // NORMAL FIELD
+        case "!" =>   new Field(true)   // FLAGGED MINE FIELD
+        case "?" =>   new Field(false)  // FLAGGED NORMAL FIELD
+        case "+" =>   new Field(false)  // OPENED FIELD
         case _ => throw new IllegalArgumentException("Unknown symbol found in file!")
       }
     }
@@ -38,7 +38,7 @@ class Board(layout: List[List[String]]) extends GridBagPanel {
   maximumSize   = preferredSize
   minimumSize   = preferredSize
 
-  def adjacent: List[(Int, Int)] = List(
+  private def adjacent: List[(Int, Int)] = List(
     (-1, -1),(-1, 0),(-1, 1),
     (0, -1),         (0, 1),
     (1, -1), (1, 0), (1, 1)

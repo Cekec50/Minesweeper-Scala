@@ -1,7 +1,5 @@
 package ui
 
-import controller.FileController
-
 import scala.swing._
 import scala.swing.event._
 

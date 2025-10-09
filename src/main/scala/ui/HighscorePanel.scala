@@ -7,19 +7,16 @@ import scala.swing.event.ButtonClicked
 
 class HighscorePanel(frame: MainFrameUI) extends BorderPanel {
   // Top label
-  val titleLabel = new Label("=== Highscores ===") {
+  private val title = new Label("Highscores") {
     font = new java.awt.Font("Arial", java.awt.Font.BOLD, 18)
   }
 
-  // Back button
-  val backButton = new Button("Back") {
-    reactions += { case ButtonClicked(_) => frame.showMenu() }
-  }
+  private val backButton = new Button("Back")
 
   // Scores container
-  val scoresPanel = new BoxPanel(Orientation.Vertical)
+  private val scoresPanel = new BoxPanel(Orientation.Vertical)
 
-  layout(titleLabel) = BorderPanel.Position.North
+  layout(title) = BorderPanel.Position.North
   layout(scoresPanel) = BorderPanel.Position.Center
   layout(backButton) = BorderPanel.Position.South
 
@@ -38,9 +35,11 @@ class HighscorePanel(frame: MainFrameUI) extends BorderPanel {
         scoresPanel.contents += new Label(s"${idx + 1}. ${entry._1} - ${entry._2}")
       }
     }
-
     revalidate()
     repaint()
   }
+
+  listenTo(backButton)
+  reactions += { case ButtonClicked(`backButton`) => frame.showMenu() }
 }
 
