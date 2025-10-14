@@ -7,12 +7,10 @@ import java.io.File
 import scala.io.Source
 
 class LevelCreatorTest extends AnyFunSuite with BeforeAndAfter{
-  var levelCreatorController: LevelCreatorController = _
   var board: Board = _
   var board2: Board = _
 
   before{
-    levelCreatorController = new LevelCreatorController()
     val file = new File("src/test/resources/test-level-2.txt")
     val (boardTmp, _ , _) = FileController.loadLevelFromFile(file)
     board = boardTmp
@@ -26,11 +24,11 @@ class LevelCreatorTest extends AnyFunSuite with BeforeAndAfter{
     val rows = board.rows
     val cols = board.cols
 
-    board = levelCreatorController.addRow(board)
+    board = LevelCreatorController.addRow(board)
     assert(board.rows == rows + 1)
     assert(board.cols == cols)
 
-    board = levelCreatorController.addColumn(board)
+    board = LevelCreatorController.addColumn(board)
     assert(board.rows == rows + 1)
     assert(board.cols == cols + 1)
   }
@@ -38,18 +36,18 @@ class LevelCreatorTest extends AnyFunSuite with BeforeAndAfter{
     val rows = board.rows
     val cols = board.cols
 
-    board = levelCreatorController.deleteRow(board)
+    board = LevelCreatorController.deleteRow(board)
     assert(board.rows == rows - 1)
     assert(board.cols == cols)
 
-    board = levelCreatorController.deleteColumn(board)
+    board = LevelCreatorController.deleteColumn(board)
     assert(board.rows == rows - 1)
     assert(board.cols == cols - 1)
 
   }
   test("Replace field type") {
     val fieldWasMine = board.fields(0)(0).getIsMine
-    board = levelCreatorController.toggleMines(board, List(((0,0), true)))
+    board = LevelCreatorController.toggleMines(board, List(((0,0), true)))
 
     assert(board.fields(0)(0).getIsMine != fieldWasMine)
   }
@@ -59,7 +57,7 @@ class LevelCreatorTest extends AnyFunSuite with BeforeAndAfter{
     assert(board.fields(2)(1).getIsMine)
 
     val selectedFields = List(((1,1), true), ((1,2), true), ((2,1), true), ((2,2), true) )
-    board = levelCreatorController.clearArea(board, selectedFields)
+    board = LevelCreatorController.clearArea(board, selectedFields)
 
     assert(!board.fields(1)(1).getIsMine)
     assert(!board.fields(1)(2).getIsMine)
@@ -67,7 +65,7 @@ class LevelCreatorTest extends AnyFunSuite with BeforeAndAfter{
   }
 
   test("Saving a valid level creates correct file content") {
-    board2 = levelCreatorController.toggleMines(board2, List(((0,0), true), ((0,1), true), ((1,0), true), ((1,1), true) ))
+    board2 = LevelCreatorController.toggleMines(board2, List(((0,0), true), ((0,1), true), ((1,0), true), ((1,1), true) ))
 
     val file: File = FileController.saveLevelToFile(board2, "beginner", "test_level_save.txt")
     assert(file.exists(), "Level file should exist")

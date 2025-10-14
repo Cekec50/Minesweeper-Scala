@@ -1,17 +1,16 @@
 package isometries
 
 
-
 object IsometryFunction {
+  def rotateExpand: Isometry = new Rotation() with Expandable with NonTransparent
+  def rotateNoExpand: Isometry = new Rotation() with NonExpandable with NonTransparent
 
-  def rotate: Isometry = new Rotation() with Expandable
+  def axialReflection : Isometry = new AxialReflection() with NonTransparent
 
-  def axialReflection : Isometry = AxialReflection()
+  def centralSymmetry:  Isometry =  (new Rotation() with Expandable >>> new Rotation() with Expandable)
 
-  def centralSymmetry:  Isometry = Rotation() >>> Rotation()
+  def translate: Isometry = AxialReflection() >>> AxialReflection()
 
-//  def translate: Isometry = AxialReflection() >>> AxialReflection()
-//
 
 
 }

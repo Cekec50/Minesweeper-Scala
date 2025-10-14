@@ -40,8 +40,4 @@ case class AxialReflection() extends Isometry {
 
   override def inverse: Isometry = this
 
-  override def add(x: Int): Int = {
-    println("Rotation: " + x + 10)
-    x + 10
-  }
 }

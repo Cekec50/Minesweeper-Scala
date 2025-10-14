@@ -15,7 +15,7 @@ class MainFrameUI extends MainFrame {
 
   font = new Font("Arial", java.awt.Font.BOLD, 40)
   title = "Minesweeper"
-  preferredSize = new Dimension(500, 500)
+  //preferredSize = new Dimension(500, 500)
   contents = menuPanel
 
 

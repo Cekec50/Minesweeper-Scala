@@ -6,6 +6,8 @@ class Board(layout: List[List[String]]) extends GridBagPanel {
   val rows: Int = layout.size
   val cols: Int = layout.head.size
   val cellSize: Int = 40
+  preferredSize = new Dimension(cols * cellSize, rows * cellSize)
+  minimumSize = new Dimension(10 * cellSize, 5 * cellSize)
 
   // === Grid of buttons ===
   var fields: List[List[Field]] =
@@ -124,9 +126,11 @@ class Board(layout: List[List[String]]) extends GridBagPanel {
   def countMines(): Int = {
     fields.flatten.count(f => f.getIsMine)
   }
-  def setMine(coordinates: (Int, Int)): Unit = {
-    val (r, c) = coordinates
-    fields = fields.updated(r, fields(r).updated(c, new Field(true)))
+
+  def getLayout(onlyMines: Boolean): List[List[String]] = {
+    if(onlyMines) fields.map(_.map(field => if (field.getIsMine) "#" else "-"))
+    else layout
   }
+
 
 }

@@ -10,7 +10,6 @@ import scala.swing.event.{ButtonClicked, MouseClicked}
 
 class LevelCreatorPanel(frame: MainFrameUI) extends BorderPanel {
   private var board = new Board(List.fill(10, 10)("-"))
-  private val levelCreatorController = new LevelCreatorController()
   private val cellSize = 40
 
   // === Title ===
@@ -110,7 +109,13 @@ class LevelCreatorPanel(frame: MainFrameUI) extends BorderPanel {
   private val buttonBar = new FlowPanel {
     contents ++= Seq(saveLevelButton, backButton)
   }
+  private def unhighlighAll={
+    highlightedFields = Nil
+    board.fields.flatten.foreach(f => f.unhighlightField())
+  }
   private def setNewBoard(newBoard:Board): Unit = {
+    unhighlighAll
+
     layout -= board
     deafTo(board.fields.flatten: _*)
     deafTo(board.fields.flatten.map(_.mouse.clicks): _*)
@@ -122,6 +127,8 @@ class LevelCreatorPanel(frame: MainFrameUI) extends BorderPanel {
     board.repaint()
 
     board.revealAllMinesLevel
+
+    frame.pack()
   }
 
   private def saveLevel(): Unit = {
@@ -150,7 +157,7 @@ class LevelCreatorPanel(frame: MainFrameUI) extends BorderPanel {
       case "Main Diag" => 2
       case "Second Diag" => 3
     }
-    val (newBoard, newHighlightedFields, _, _) = isometryFunc(board, highlightedFields, pivotField, reflection)
+    val (newBoard, newHighlightedFields, newPivotField, _) = isometryFunc(board, highlightedFields, pivotField, reflection)
 
     setNewBoard(newBoard)
     highlightedFields = newHighlightedFields
@@ -159,7 +166,7 @@ class LevelCreatorPanel(frame: MainFrameUI) extends BorderPanel {
         board.fields(r)(c).highlightField()
     }
 
-    board.fields(pivotField._1)(pivotField._2).enabled = false
+    board.fields(newPivotField._1)(newPivotField._2).enabled = false
   }
 
 
@@ -181,22 +188,20 @@ class LevelCreatorPanel(frame: MainFrameUI) extends BorderPanel {
   reactions +={
     case e: MouseClicked if e.peer.getButton == java.awt.event.MouseEvent.BUTTON3 =>
       val field = e.source.asInstanceOf[Field]
-      levelCreatorController.selectField(board, field)
+      LevelCreatorController.selectField(board, field)
     case ButtonClicked(field: Field) => highlightedFields = board.highlighFields(highlightedFields, field)
 
-    case ButtonClicked(`addRowButton`) => setNewBoard(levelCreatorController.addRow(board))
-    case ButtonClicked(`addColumnButton`) => setNewBoard(levelCreatorController.addColumn(board))
-    case ButtonClicked(`deleteRowButton`) => setNewBoard(levelCreatorController.deleteRow(board))
-    case ButtonClicked(`deleteColumnButton`) => setNewBoard(levelCreatorController.deleteColumn(board))
-    case ButtonClicked(`toggleMineButton`) => setNewBoard(levelCreatorController.toggleMines(board, highlightedFields))
-      highlightedFields = Nil
-    case ButtonClicked(`clearAreaButton`) =>  setNewBoard(levelCreatorController.clearArea(board, highlightedFields))
-      highlightedFields = Nil
+    case ButtonClicked(`addRowButton`) => setNewBoard(LevelCreatorController.addRow(board))
+    case ButtonClicked(`addColumnButton`) => setNewBoard(LevelCreatorController.addColumn(board))
+    case ButtonClicked(`deleteRowButton`) => setNewBoard(LevelCreatorController.deleteRow(board))
+    case ButtonClicked(`deleteColumnButton`) => setNewBoard(LevelCreatorController.deleteColumn(board))
+    case ButtonClicked(`toggleMineButton`) => setNewBoard(LevelCreatorController.toggleMines(board, highlightedFields))
+    case ButtonClicked(`clearAreaButton`) =>  setNewBoard(LevelCreatorController.clearArea(board, highlightedFields))
 
     case ButtonClicked(`applyButton`) => isometryGroup.selected.get.text match {
-      case "Rotate" => applyIsometry(IsometryFunction.rotate.apply)
+      case "Rotate" => applyIsometry(IsometryFunction.rotateExpand.apply)
       case "Axial Reflection" => applyIsometry(IsometryFunction.axialReflection.apply)
-      case "Translate" => println("Translate!")
+      case "Translate" => applyIsometry(IsometryFunction.translate.apply)
       case "Central Symmetry" => applyIsometry(IsometryFunction.centralSymmetry.apply)
       case _ =>
     }

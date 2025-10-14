@@ -7,6 +7,7 @@ import scala.util.Random
 
 class DifficultyChooserPanel(frame: MainFrameUI) extends BorderPanel {
 
+  preferredSize = new Dimension(500, 500)
   // === Title ===
   private val title = new Label("Choose Difficulty") {
     font = new Font("Arial", java.awt.Font.BOLD, 20)

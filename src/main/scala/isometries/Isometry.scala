@@ -18,11 +18,9 @@ trait Isometry {
       override def inverse: Isometry =
         next.inverse >>> self.inverse // The order is reversed
 
-      override def add(x:Int): Int = ???
 
     }
   }
-  def add(x:Int): Int
 
 }
 

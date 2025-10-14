@@ -3,24 +3,22 @@ package controller
 import model.Board
 import model.Field
 
-class LevelCreatorController {
+object LevelCreatorController {
 
-  def mapBooleanToString(board: Board): List[List[String]] = {
-    board.fields.map(_.map(field => if (field.getIsMine) "#" else "-"))
-  }
+
   def addRow(board: Board): Board = {
-    new Board(mapBooleanToString(board) :+ List.fill(board.cols)("-"))
+    new Board(board.getLayout(true) :+ List.fill(board.cols)("-"))
 
   }
   def addColumn(board: Board): Board = {
-    new Board(mapBooleanToString(board).zip(List.fill(board.rows)("-")).map { case (row, v) => row :+ v })
+    new Board(board.getLayout(true).zip(List.fill(board.rows)("-")).map { case (row, v) => row :+ v })
 
   }
   def deleteRow(board: Board): Board = {
-    new Board(mapBooleanToString(board).dropRight(1))
+    new Board(board.getLayout(true).dropRight(1))
   }
   def deleteColumn(board: Board): Board = {
-    new Board(mapBooleanToString(board).map(_.dropRight(1)))
+    new Board(board.getLayout(true).map(_.dropRight(1)))
   }
 
   def selectField(board: Board, fieldSelected: Field): Unit = {
@@ -70,4 +68,16 @@ class LevelCreatorController {
     })
   }
 
+  def updateBoardWithHighlightedFields(board: Board, highlightedFields: List[((Int, Int), Boolean)]): Board = {
+    val highlightedMap = highlightedFields.toMap
+
+    new Board(board.fields.zipWithIndex.map { case (row, i) =>
+      row.zipWithIndex.map { case (elem, j) =>
+        highlightedMap.get((i, j)) match {
+          case Some(true)  => "#" // mine field
+          case _           => "-" // normal field
+        }
+      }
+    })
+  }
 }

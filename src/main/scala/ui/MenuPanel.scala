@@ -5,6 +5,8 @@ import scala.swing.event._
 
 class MenuPanel(frame: MainFrameUI) extends BoxPanel(Orientation.Vertical) {
 
+  preferredSize = new Dimension(500, 500)
+
   contents += Swing.VStrut(20)
   contents += new Label("Minesweeper") {
     font = new Font("Arial", java.awt.Font.BOLD, 20)
@@ -22,6 +24,7 @@ class MenuPanel(frame: MainFrameUI) extends BoxPanel(Orientation.Vertical) {
     case comp: Component => comp.xLayoutAlignment = 0.5
     case _ =>
   }
+
 
   private def makeMenuButton(text: String, action: () => Unit): Button = {
     val btn = new Button(text) {

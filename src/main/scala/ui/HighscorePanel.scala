@@ -6,6 +6,7 @@ import scala.swing._
 import scala.swing.event.ButtonClicked
 
 class HighscorePanel(frame: MainFrameUI) extends BorderPanel {
+  preferredSize = new Dimension(500, 700)
   // Top label
   private val title = new Label("Highscores") {
     font = new java.awt.Font("Arial", java.awt.Font.BOLD, 18)
@@ -27,7 +28,7 @@ class HighscorePanel(frame: MainFrameUI) extends BorderPanel {
   private def updateScores(): Unit = {
     scoresPanel.contents.clear()
 
-    val scores = FileController.loadScores("highscores.txt").take(20) // top 20 scores
+    val scores = FileController.loadScores("highscores.txt").take(30) // top 20 scores
     if (scores.isEmpty) {
       scoresPanel.contents += new Label("No scores yet.")
     } else {
