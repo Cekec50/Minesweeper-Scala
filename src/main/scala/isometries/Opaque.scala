@@ -1,5 +1,0 @@
-package isometries
-
-trait Opaque {
-
-}

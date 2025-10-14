@@ -43,16 +43,6 @@ class GamePanel(frame:MainFrameUI, board: Board, startSeconds: Int = 0, startMov
     contents += menuButton
   }
 
-  // === Layout ===
-  layout(topBar) = BorderPanel.Position.North
-  layout(board)  = BorderPanel.Position.Center
-
-  // === Events ===
-  listenTo(helpButton,loadMovesButton,saveButton,menuButton)
-  listenTo(board.fields.flatten: _*)
-  listenTo(board.fields.flatten.map(_.mouse.clicks): _*)
-  //deafTo(board.fields.flatten: _*)
-
 
   // Start and stop methods
   def startTimer = {
@@ -74,6 +64,7 @@ class GamePanel(frame:MainFrameUI, board: Board, startSeconds: Int = 0, startMov
     deafTo(board.fields.flatten.map(_.mouse.clicks): _*)
   }
   def gameLost() = {
+    println(gameController.getGameState)
     stopTimer()
     board.revealAllMines
     disableBoard
@@ -92,15 +83,23 @@ class GamePanel(frame:MainFrameUI, board: Board, startSeconds: Int = 0, startMov
       title = "Victory!"
     )
     name.foreach { n =>
-      FileController.saveScore(n, points)
+      FileController.saveScore(n, points, "highscores.txt")
+      Dialog.showMessage(this, s"Score saved for $n", "Victory")
     }
-
-    Dialog.showMessage(this, s"Score saved for $name", "Victory")
   }
+
+  // === Layout ===
+  layout(topBar) = BorderPanel.Position.North
+  layout(board)  = BorderPanel.Position.Center
+
+  // === Events ===
+  listenTo(helpButton,loadMovesButton,saveButton,menuButton)
+  listenTo(board.fields.flatten: _*)
+  listenTo(board.fields.flatten.map(_.mouse.clicks): _*)
 
   reactions += {
     case ButtonClicked(`helpButton`) => gameController.suggestMove(board); makeMove(20)
-    case ButtonClicked(`loadMovesButton`) => gameController.playMovesFromFile(FileController.loadFile(frame), board)
+    case ButtonClicked(`loadMovesButton`) => gameController.playMovesFromFile(frame, board)
     case ButtonClicked(`saveButton`) => FileController.saveGame(frame, board, moves, seconds)
     case ButtonClicked(`menuButton`) => frame.showMenu()
     case ButtonClicked(field: Field) =>

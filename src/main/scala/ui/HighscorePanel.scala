@@ -27,7 +27,7 @@ class HighscorePanel(frame: MainFrameUI) extends BorderPanel {
   private def updateScores(): Unit = {
     scoresPanel.contents.clear()
 
-    val scores = FileController.loadScores().take(10) // top 10 scores
+    val scores = FileController.loadScores("highscores.txt").take(20) // top 20 scores
     if (scores.isEmpty) {
       scoresPanel.contents += new Label("No scores yet.")
     } else {

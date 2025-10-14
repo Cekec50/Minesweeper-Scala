@@ -7,9 +7,9 @@ import javax.swing.{Timer => SwingTimer}
 
 class Field(isMine: Boolean ) extends Button{
 
-  val cellSize: Int = 40
-  var fieldText: String = if (isMine) "#" else ""
-  var isFlagged: Boolean = false
+  private val cellSize: Int = 40
+  private val fieldText: String = if (isMine) "#" else ""
+  private var isFlagged: Boolean = false
 
   preferredSize = new Dimension(cellSize, cellSize)
   minimumSize   = preferredSize
@@ -28,6 +28,10 @@ class Field(isMine: Boolean ) extends Button{
       enabled = false
       text = fieldText
       isMine
+  }
+  def revealFieldLevel: Boolean = {
+    text = fieldText
+    isMine
   }
   def flagField(bool: Boolean = false): Option[Boolean] = {
     if(enabled){
@@ -57,6 +61,13 @@ class Field(isMine: Boolean ) extends Button{
     })
     t.setRepeats(false)
     t.start()
+  }
+
+  def highlightField(): Unit = {
+    border = BorderFactory.createLineBorder(Color.BLACK, 2)
+  }
+  def unhighlightField(): Unit = {
+    border = BorderFactory.createLineBorder(Color.GRAY, 1)
   }
 
 }

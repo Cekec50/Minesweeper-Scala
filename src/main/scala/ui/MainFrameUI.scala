@@ -19,16 +19,21 @@ class MainFrameUI extends MainFrame {
   contents = menuPanel
 
 
+
   def chooseDifficulty(): Unit = {
     contents = difficultyChooserPanel
     validate()
     repaint()
   }
   def startGame(file: File): Unit = {
-    val (board, seconds, moves) = FileController.loadLevelFromFile(file)
-    gamePanel = new GamePanel(this, board, seconds, moves)
-    contents = gamePanel
-    pack() // adjust frame size to fit new preferredSize
+    try{
+      val (board, seconds, moves) = FileController.loadLevelFromFile(file)
+      gamePanel = new GamePanel(this, board, seconds, moves)
+      contents = gamePanel
+      pack() // adjust frame size to fit new preferredSizex
+    }catch {
+      case e: IllegalArgumentException => println(e.getMessage)
+    }
   }
 
 
@@ -40,8 +45,12 @@ class MainFrameUI extends MainFrame {
   }
 
   def loadLevel():Unit = {
-    val file = FileController.loadFile(this)
-    startGame(file)
+    try{
+      val file = FileController.loadFile(this)
+      startGame(file)
+    }catch {
+      case e: IllegalStateException => println(e.getMessage)
+    }
   }
 
   def openHighscores(): Unit = {

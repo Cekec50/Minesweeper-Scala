@@ -1,15 +1,17 @@
 package ui
 
-import controller.LevelCreatorController
-import model.Board
+import controller.{FileController, LevelCreatorController}
+import isometries.{IsometryFunction, Rotation}
+import model.{Board, Field}
 
 import scala.swing._
 import scala.swing.BorderPanel.Position
-import scala.swing.event.ButtonClicked
+import scala.swing.event.{ButtonClicked, MouseClicked}
 
 class LevelCreatorPanel(frame: MainFrameUI) extends BorderPanel {
   private var board = new Board(List.fill(10, 10)("-"))
   private val levelCreatorController = new LevelCreatorController()
+  private val cellSize = 40
 
   // === Title ===
   private val title = new Label("Level Creator") {
@@ -29,27 +31,45 @@ class LevelCreatorPanel(frame: MainFrameUI) extends BorderPanel {
   private val saveLevelButton = new Button("Save Level")
   private val backButton = new Button("Back")
 
-  // === Difficulty selection ===
-  private val beginner     = new RadioButton("Beginner")
+  private val beginner     = new RadioButton("Beginner") {selected = true}
   private val intermediate = new RadioButton("Intermediate")
   private val expert       = new RadioButton("Expert")
   private val difficultyGroup = new ButtonGroup(beginner, intermediate, expert)
 
-  private val difficultyBox = new BoxPanel(Orientation.Vertical) {
-    contents += new Label("Choose Difficulty") {
-      xAlignment = Alignment.Center
-      border = Swing.EmptyBorder(5, 0, 5, 0)
-    }
-    contents ++= Seq(beginner, intermediate, expert)
-    border = Swing.TitledBorder(Swing.EtchedBorder, "Difficulty")
-  }
+  private val isometryRotation = new RadioButton("Rotate") {selected = true}
+  private val isometryAxialReflection = new RadioButton("Axial Reflection")
+  private val isometryTranslation = new RadioButton("Translate")
+  private val isometryCentralSymmetry = new RadioButton("Central Symmetry")
 
-  // === Operations (uniform button size) ===
+  private val reflectionRow = new RadioButton("Row") {selected = true}
+  private val reflectionColumn = new RadioButton("Column")
+  private val reflectionMainDiag = new RadioButton("Main Diag")
+  private val reflectionSecondDiag = new RadioButton("Second Diag")
+  private val isometryGroup = new ButtonGroup(isometryRotation,isometryAxialReflection, isometryTranslation, isometryCentralSymmetry)
+  private val reflectionGroup = new ButtonGroup(reflectionRow, reflectionColumn, reflectionMainDiag, reflectionSecondDiag)
+
+  var highlightedFields: List[((Int, Int), Boolean)] = Nil
+
+  private def rotate =  Rotation()
+
   private def operationButton(text: String): Button = new Button(text) {
     preferredSize = new Dimension(150, 35)
     maximumSize = preferredSize
     margin = new Insets(5, 10, 5, 10)
   }
+  private val difficultyBox = new BoxPanel(Orientation.Vertical) {
+    contents += beginner
+    contents += new Label("Height/Width/Mines:")
+    contents += new Label("5-10/5-10/5-15")
+    contents += intermediate
+    contents += new Label("Height/Width/Mines:")
+    contents += new Label("10-15/10-20/15–50")
+    contents += expert
+    contents += new Label("Height/Width/Mines:")
+    contents += new Label("15-20/20-30/50–120")
+    border = Swing.TitledBorder(Swing.EtchedBorder, "Difficulty")
+  }
+
 
   private val buttonBox = new BoxPanel(Orientation.Vertical) {
     contents += new Label("Operations") {
@@ -61,30 +81,28 @@ class LevelCreatorPanel(frame: MainFrameUI) extends BorderPanel {
     border = Swing.EmptyBorder(10, 10, 10, 10)
   }
 
-  // === Isometries ===
-  private val levelList = new ListView[String](Seq.empty)
-  private val scrollPanel = new ScrollPane(levelList) {
-    preferredSize = new Dimension(200, 150)
-  }
-
   private val isometryBox = new BoxPanel(Orientation.Vertical) {
-    contents += new Label("Choose Isometry") {
-      xAlignment = Alignment.Center
-      border = Swing.EmptyBorder(5, 0, 5, 0)
+    contents += new BoxPanel(Orientation.Horizontal) {
+      contents ++= Seq(isometryRotation, isometryAxialReflection, isometryTranslation, isometryCentralSymmetry)
     }
-    contents += scrollPanel
-    contents += new FlowPanel{
+    contents += new FlowPanel {
       contents ++= Seq(applyButton, inverseButton)
     }
-    border = Swing.TitledBorder(Swing.EtchedBorder, "Isometries")
-    border = Swing.EmptyBorder(10, 10, 10, 10)
+
+    border = Swing.TitledBorder(Swing.EtchedBorder, "Isometry")
   }
+  private val reflectionBox = new BoxPanel(Orientation.Horizontal) {
+    contents ++= Seq(reflectionRow, reflectionColumn, reflectionMainDiag, reflectionSecondDiag)
+    border = Swing.TitledBorder(Swing.EtchedBorder, "Reflection Axis")
+  }
+
 
   private val westBox = new BoxPanel(Orientation.Vertical) {
     contents += difficultyBox
     contents += Swing.VStrut(15)
     contents += buttonBox
     contents += Swing.VStrut(15)
+    contents += reflectionBox
     contents += isometryBox
   }
 
@@ -94,11 +112,58 @@ class LevelCreatorPanel(frame: MainFrameUI) extends BorderPanel {
   }
   private def setNewBoard(newBoard:Board): Unit = {
     layout -= board
+    deafTo(board.fields.flatten: _*)
+    deafTo(board.fields.flatten.map(_.mouse.clicks): _*)
     board = newBoard
     layout(board)   = Position.Center
+    listenTo(board.fields.flatten: _*)
+    listenTo(board.fields.flatten.map(_.mouse.clicks): _*)
     board.revalidate()
     board.repaint()
+
+    board.revealAllMinesLevel
   }
+
+  private def saveLevel(): Unit = {
+    println(board.countMines())
+    difficultyGroup.selected.get.text match {
+
+      case "Beginner" => if(board.rows >= 5 && board.rows <= 10 && board.cols >= 5 && board.cols <= 10 &&
+        board.countMines() >= 5 && board.countMines() <= 15)
+        FileController.saveLevel(frame, board, "beginner")
+      case "Intermediate" => if(board.rows >= 10 && board.rows <= 15 && board.cols >= 10 && board.cols <= 20 &&
+        board.countMines() >= 15 && board.countMines() <= 50)
+        FileController.saveLevel(frame, board, "intermediate")
+      case "Expert" => if(board.rows >= 15 && board.rows <= 20 && board.cols >= 20 && board.cols <= 30 &&
+        board.countMines() >= 50 && board.countMines() <= 120)
+        FileController.saveLevel(frame, board, "expert")
+    }
+  }
+
+  private def applyIsometry(isometryFunc: (Board, List[((Int, Int), Boolean)], (Int, Int), Int)
+                               => (Board, List[((Int, Int), Boolean)], (Int, Int), Int)): Unit = {
+
+    val pivotField = board.getCoordinatesFromField(board.fields.flatten.find(f => !f.enabled).get)
+    val reflection = reflectionGroup.selected.get.text match {
+      case "Row" => 0
+      case "Column" => 1
+      case "Main Diag" => 2
+      case "Second Diag" => 3
+    }
+    val (newBoard, newHighlightedFields, _, _) = isometryFunc(board, highlightedFields, pivotField, reflection)
+
+    setNewBoard(newBoard)
+    highlightedFields = newHighlightedFields
+    highlightedFields.foreach { case ((r, c), _) =>
+      if (r >= 0 && c >= 0 && r < board.rows && c < board.cols)
+        board.fields(r)(c).highlightField()
+    }
+
+    board.fields(pivotField._1)(pivotField._2).enabled = false
+  }
+
+
+
   // === Layout ===
   layout(title)   = Position.North
   layout(westBox) = Position.West
@@ -109,18 +174,36 @@ class LevelCreatorPanel(frame: MainFrameUI) extends BorderPanel {
   listenTo(addRowButton, addColumnButton, deleteRowButton, deleteColumnButton, toggleMineButton, clearAreaButton)
   listenTo(applyButton, inverseButton)
   listenTo(saveLevelButton, backButton)
+
+  listenTo(board.fields.flatten: _*)
+  listenTo(board.fields.flatten.map(_.mouse.clicks): _*)
+
   reactions +={
+    case e: MouseClicked if e.peer.getButton == java.awt.event.MouseEvent.BUTTON3 =>
+      val field = e.source.asInstanceOf[Field]
+      levelCreatorController.selectField(board, field)
+    case ButtonClicked(field: Field) => highlightedFields = board.highlighFields(highlightedFields, field)
+
     case ButtonClicked(`addRowButton`) => setNewBoard(levelCreatorController.addRow(board))
     case ButtonClicked(`addColumnButton`) => setNewBoard(levelCreatorController.addColumn(board))
     case ButtonClicked(`deleteRowButton`) => setNewBoard(levelCreatorController.deleteRow(board))
     case ButtonClicked(`deleteColumnButton`) => setNewBoard(levelCreatorController.deleteColumn(board))
-    case ButtonClicked(`toggleMineButton`) =>
-    case ButtonClicked(`clearAreaButton`) =>
+    case ButtonClicked(`toggleMineButton`) => setNewBoard(levelCreatorController.toggleMines(board, highlightedFields))
+      highlightedFields = Nil
+    case ButtonClicked(`clearAreaButton`) =>  setNewBoard(levelCreatorController.clearArea(board, highlightedFields))
+      highlightedFields = Nil
 
-    case ButtonClicked(`applyButton`) =>
-    case ButtonClicked(`inverseButton`) =>
+    case ButtonClicked(`applyButton`) => isometryGroup.selected.get.text match {
+      case "Rotate" => applyIsometry(IsometryFunction.rotate.apply)
+      case "Axial Reflection" => applyIsometry(IsometryFunction.axialReflection.apply)
+      case "Translate" => println("Translate!")
+      case "Central Symmetry" => applyIsometry(IsometryFunction.centralSymmetry.apply)
+      case _ =>
+    }
+    case ButtonClicked(`inverseButton`) =>  
 
-    case ButtonClicked(`saveLevelButton`) =>
+    case ButtonClicked(`saveLevelButton`) => saveLevel()
     case ButtonClicked(`backButton`) => frame.showMenu()
+
   }
 }

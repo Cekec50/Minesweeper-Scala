@@ -9,34 +9,31 @@ import scala.swing.{Component, Dialog, FileChooser, Window}
 
 object FileController {
 
-
+  def saveGameToFile(file: File, board: Board, moves: Int, seconds: Int): Unit = {
+    val writer = new PrintWriter(file)
+    try {
+      for (row <- board.fields) {
+        val line = row.map { field =>
+          (field.enabled, field.getIsMine, field.getIsFlagged) match {
+            case (true, true, true)  => '!'
+            case (true, true, false) => '#'
+            case (true, false, true) => '?'
+            case (true, false, false)=> '-'
+            case (false, _, _)       => '+'
+          }
+        }.mkString
+        writer.println(line)
+      }
+      writer.println(s"m:$moves")
+      writer.println(s"s:$seconds")
+    } finally writer.close()
+  }
   def saveGame(parent: Window, board: Board, moves: Int, seconds: Int): Unit = {
     val chooser = new FileChooser(new java.io.File("."))
     chooser.title = "Save Game"
     if (chooser.showSaveDialog(parent) == FileChooser.Result.Approve) {
-      val file = chooser.selectedFile
-      val writer = new PrintWriter(file)
-      try {
-        // Write the board
-        for (row <- board.fields) {
-          val line = row.map { field =>
-            (field.enabled, field.getIsMine, field.isFlagged) match {
-              case (true, true, true)  => '!' // mine and flagged
-              case (true, true, false) => '#' // mine
-              case (true, false, true) => '?' // normal field flagged
-              case (true, false, false)=> '-' // normal field
-              case (false, _, _) => '+'       // clicked field
-            }
-          }.mkString
-          writer.println(line)
-        }
-        // Write moves and seconds
-        writer.println(s"m:$moves")
-        writer.println(s"s:$seconds")
-        Dialog.showMessage(parent, "Game saved successfully!", "Save")
-      } finally {
-        writer.close()
-      }
+      saveGameToFile(chooser.selectedFile, board, moves, seconds)
+      Dialog.showMessage(parent, "Game saved successfully!", "Save")
     }
   }
   def loadFile(parent: Window): File = {
@@ -89,32 +86,67 @@ object FileController {
         )
       }.toList.map(_.toString)
     }.toList
-    println("Layout: " + layout)
-    println("Lines: " + lines)
 
     (new Board(layout), seconds, moves)
   }
-  def loadScores(): List[(String, Int)] = {
-    val file = new File("highscores.txt")
+  def loadScores(filename: String): List[(String, Int)] = {
+    val file = new File(filename)
     if (!file.exists()) return List()
     Source.fromFile(file).getLines().flatMap { line =>
       line.split(",") match {
         case Array(name, scoreStr) =>
           try Some((name, scoreStr.toInt))
-          catch { case _: Exception => None }
+          catch {
+            case _: Exception => None
+          }
         case _ => None
       }
     }.toList.sortBy(-_._2) // descending
   }
 
   /** Save a new score */
-  def saveScore(name: String, score: Int): Unit = {
-    val file = new java.io.File("highscores.txt")
+  def saveScore(name: String, score: Int, filename: String): Unit = {
+    val file = new java.io.File(filename)
     val writer = new java.io.FileWriter(file, true) // `true` for append mode
     writer.write(s"$name,$score\n")
     writer.close()
   }
 
+  def saveLevelToFile(board: Board, difficulty: String, filename: String): File = {
+    val dir = new java.io.File(s"levels/$difficulty")
+    if (!dir.exists()) dir.mkdirs()
+
+    val file = new java.io.File(dir, s"$filename.txt")
+    val writer = new java.io.PrintWriter(file)
+
+    try {
+      for (row <- board.fields) {
+        val line = row.map(f => if (f.getIsMine) "#" else "-").mkString
+        writer.println(line)
+      }
+    } finally {
+      writer.close()
+    }
+    file
+  }
+
+  def saveLevel(parent: Window, board: Board, difficulty: String): Unit = {
+    try {
+      val filenameOpt = Dialog.showInput(
+        parent,
+        message = "Enter level name",
+        initial = "Level name",
+        title = "Save Level"
+      )
+
+      filenameOpt.foreach { filename =>
+        saveLevelToFile(board, difficulty, filename)
+        Dialog.showMessage(parent, "Level saved successfully!", "Save")
+      }
+    } catch {
+      case _: Exception => println("Saved Level Cancelled")
+    }
+  }
 
 
 

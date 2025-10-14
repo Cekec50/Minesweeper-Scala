@@ -1,6 +1,8 @@
 Gas,1000
-gasfasfsa,1000
-Player,1000
-Nikola,999
-DJoleaease,946
-ewwrewrw,999
+Player,999
+Player,999
+Player,999
+Player,999
+asdsadas,999
+lololaooas,595
+Player,919

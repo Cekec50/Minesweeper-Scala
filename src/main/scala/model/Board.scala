@@ -1,6 +1,5 @@
 package model
 
-import scala.annotation.tailrec
 import scala.swing.{Dimension, GridBagPanel}
 
 class Board(layout: List[List[String]]) extends GridBagPanel {
@@ -9,7 +8,7 @@ class Board(layout: List[List[String]]) extends GridBagPanel {
   val cellSize: Int = 40
 
   // === Grid of buttons ===
-  val fields: List[List[Field]] =
+  var fields: List[List[Field]] =
     List.tabulate(rows, cols) { (r, c) =>
       layout(r)(c) match {
         case "#" =>   new Field(true)   // MINE FIELD
@@ -76,7 +75,58 @@ class Board(layout: List[List[String]]) extends GridBagPanel {
     fields.flatten.filter(field => field.getIsMine).foreach(field => field.revealField)
   }
 
+  def revealAllMinesLevel = {
+    fields.flatten.filter(field => field.getIsMine).foreach(field => field.revealFieldLevel)
+  }
+
   def flagAllMines = {
     fields.flatten.filter(field => field.getIsMine).foreach(field => field.flagField(true))
   }
+
+  def getCoordinatesFromField(field: Field): (Int, Int) = {
+    fields.zipWithIndex.flatMap {
+      case (row, i) =>
+        row.zipWithIndex.collect {
+          case (elem, j)
+            if (elem == field) =>
+            (i, j)
+        }
+    }.head
+  }
+  def highlighFields(highlightedFields: List[((Int, Int), Boolean)], field: Field):  List[((Int, Int), Boolean)] = {
+    if (highlightedFields.isEmpty){
+      println("Added element " + getCoordinatesFromField(field))
+      field.highlightField()
+      List((getCoordinatesFromField(field), field.getIsMine))
+    }
+    else if(highlightedFields.size == 1){
+      val (i1, j1) = highlightedFields.head._1
+      val (i2, j2) = getCoordinatesFromField(field)
+      fields.zipWithIndex.flatMap {
+        case (row, i) =>
+          row.zipWithIndex.collect {
+            case (elem, j)
+              if i <= math.max(i1, i2) && j <= math.max(j1, j2) && i >= math.min(i1, i2) && j >= math.min(j1, j2)  =>
+              println("Added element " + getCoordinatesFromField(elem))
+              elem.highlightField()
+              (getCoordinatesFromField(elem), elem.getIsMine)
+          }
+      }
+    }
+    else {
+      println("Removed elements")
+      highlightedFields.foreach(f => fields(f._1._1)(f._1._2).unhighlightField())
+      Nil
+    }
+  }
+
+
+  def countMines(): Int = {
+    fields.flatten.count(f => f.getIsMine)
+  }
+  def setMine(coordinates: (Int, Int)): Unit = {
+    val (r, c) = coordinates
+    fields = fields.updated(r, fields(r).updated(c, new Field(true)))
+  }
+
 }

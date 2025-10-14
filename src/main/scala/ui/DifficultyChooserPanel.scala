@@ -22,9 +22,14 @@ class DifficultyChooserPanel(frame: MainFrameUI) extends BorderPanel {
 
   private val difficultyBox = new BoxPanel(Orientation.Vertical) {
     contents += beginner
+    contents += new Label("Height/Width/Mines:")
+    contents += new Label("5-10/5-10/5-15")
     contents += intermediate
+    contents += new Label("Height/Width/Mines:")
+    contents += new Label("10-15/10-20/15–50")
     contents += expert
-
+    contents += new Label("Height/Width/Mines:")
+    contents += new Label("15-20/20-30/50–120")
   }
 
   // === Level list ===
