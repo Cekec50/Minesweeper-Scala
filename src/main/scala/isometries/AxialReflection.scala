@@ -1,11 +1,11 @@
 package isometries
 import model.Board
 
-case class AxialReflection() extends Isometry {
+case class AxialReflection(pivot: (Int, Int) = (0, 0)) extends Isometry {
   // the argument type will be changed later
   override def apply(board: Board, highlightedFields: List[((Int, Int), Boolean)], pivotField: (Int, Int), reflection: Int):
   (Board, List[((Int, Int), Boolean)], (Int, Int), Int) = {
-    val (x0, y0) = pivotField
+    val (x0, y0) = if (pivot == (0, 0)) pivotField else pivot
 
     val newHighlighedFields = highlightedFields.map { case ((x1, y1), value) =>
       var x2, y2: Int = 0

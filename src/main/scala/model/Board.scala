@@ -97,7 +97,7 @@ class Board(layout: List[List[String]]) extends GridBagPanel {
   }
   def highlighFields(highlightedFields: List[((Int, Int), Boolean)], field: Field):  List[((Int, Int), Boolean)] = {
     if (highlightedFields.isEmpty){
-      println("Added element " + getCoordinatesFromField(field))
+      //println("Added element " + getCoordinatesFromField(field))
       field.highlightField()
       List((getCoordinatesFromField(field), field.getIsMine))
     }
@@ -109,7 +109,7 @@ class Board(layout: List[List[String]]) extends GridBagPanel {
           row.zipWithIndex.collect {
             case (elem, j)
               if i <= math.max(i1, i2) && j <= math.max(j1, j2) && i >= math.min(i1, i2) && j >= math.min(j1, j2)  =>
-              println("Added element " + getCoordinatesFromField(elem))
+              //println("Added element " + getCoordinatesFromField(elem))
               elem.highlightField()
               (getCoordinatesFromField(elem), elem.getIsMine)
           }

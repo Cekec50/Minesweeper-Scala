@@ -1,7 +1,7 @@
 package ui
 
 import controller.{FileController, LevelCreatorController}
-import isometries.{IsometryFunction, Rotation}
+import isometries.{AxialReflection, IsometryFunction, Rotation}
 import model.{Board, Field}
 
 import scala.swing._
@@ -10,7 +10,6 @@ import scala.swing.event.{ButtonClicked, MouseClicked}
 
 class LevelCreatorPanel(frame: MainFrameUI) extends BorderPanel {
   private var board = new Board(List.fill(10, 10)("-"))
-  private val cellSize = 40
 
   // === Title ===
   private val title = new Label("Level Creator") {
@@ -40,10 +39,10 @@ class LevelCreatorPanel(frame: MainFrameUI) extends BorderPanel {
   private val isometryTranslation = new RadioButton("Translate")
   private val isometryCentralSymmetry = new RadioButton("Central Symmetry")
 
-  private val reflectionRow = new RadioButton("Row") {selected = true}
-  private val reflectionColumn = new RadioButton("Column")
-  private val reflectionMainDiag = new RadioButton("Main Diag")
-  private val reflectionSecondDiag = new RadioButton("Second Diag")
+  private val reflectionRow = new RadioButton("Row/Up") {selected = true}
+  private val reflectionColumn = new RadioButton("Column/Down")
+  private val reflectionMainDiag = new RadioButton("Main Diag/Left")
+  private val reflectionSecondDiag = new RadioButton("Second Diag/Right")
   private val isometryGroup = new ButtonGroup(isometryRotation,isometryAxialReflection, isometryTranslation, isometryCentralSymmetry)
   private val reflectionGroup = new ButtonGroup(reflectionRow, reflectionColumn, reflectionMainDiag, reflectionSecondDiag)
 
@@ -149,13 +148,12 @@ class LevelCreatorPanel(frame: MainFrameUI) extends BorderPanel {
 
   private def applyIsometry(isometryFunc: (Board, List[((Int, Int), Boolean)], (Int, Int), Int)
                                => (Board, List[((Int, Int), Boolean)], (Int, Int), Int)): Unit = {
-
     val pivotField = board.getCoordinatesFromField(board.fields.flatten.find(f => !f.enabled).get)
     val reflection = reflectionGroup.selected.get.text match {
-      case "Row" => 0
-      case "Column" => 1
-      case "Main Diag" => 2
-      case "Second Diag" => 3
+      case "Row/Up" => 0
+      case "Column/Down" => 1
+      case "Main Diag/Left" => 2
+      case "Second Diag/Right" => 3
     }
     val (newBoard, newHighlightedFields, newPivotField, _) = isometryFunc(board, highlightedFields, pivotField, reflection)
 
@@ -165,10 +163,26 @@ class LevelCreatorPanel(frame: MainFrameUI) extends BorderPanel {
       if (r >= 0 && c >= 0 && r < board.rows && c < board.cols)
         board.fields(r)(c).highlightField()
     }
-
     board.fields(newPivotField._1)(newPivotField._2).enabled = false
   }
 
+  private def applyTranslation(): Unit = {
+    val pivotField = board.getCoordinatesFromField(board.fields.flatten.find(f => !f.enabled).get)
+    val (newBoard, newHighlightedFields, newPivotField, _) = reflectionGroup.selected.get.text match {
+      case "Row/Up" => IsometryFunction.translateUp(pivotField).apply(board, highlightedFields, pivotField, 0)
+      case "Column/Down" => IsometryFunction.translateDown(pivotField).apply(board, highlightedFields, pivotField, 0)
+      case "Main Diag/Left" => IsometryFunction.translateLeft(pivotField).apply(board, highlightedFields, pivotField, 1)
+      case "Second Diag/Right" => IsometryFunction.translateRight(pivotField).apply(board, highlightedFields, pivotField, 1)
+    }
+
+    setNewBoard(newBoard)
+    highlightedFields = newHighlightedFields
+    highlightedFields.foreach { case ((r, c), _) =>
+      if (r >= 0 && c >= 0 && r < board.rows && c < board.cols)
+        board.fields(r)(c).highlightField()
+    }
+    board.fields(newPivotField._1)(newPivotField._2).enabled = false
+  }
 
 
   // === Layout ===
@@ -199,9 +213,9 @@ class LevelCreatorPanel(frame: MainFrameUI) extends BorderPanel {
     case ButtonClicked(`clearAreaButton`) =>  setNewBoard(LevelCreatorController.clearArea(board, highlightedFields))
 
     case ButtonClicked(`applyButton`) => isometryGroup.selected.get.text match {
-      case "Rotate" => applyIsometry(IsometryFunction.rotateExpand.inverse.apply)
+      case "Rotate" => applyIsometry(IsometryFunction.rotate3.apply)
       case "Axial Reflection" => applyIsometry(IsometryFunction.axialReflection.apply)
-      case "Translate" => applyIsometry(IsometryFunction.translate.apply)
+      case "Translate" => applyTranslation()
       case "Central Symmetry" => applyIsometry(IsometryFunction.centralSymmetry.apply)
       case _ =>
     }

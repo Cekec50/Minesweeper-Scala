@@ -40,4 +40,12 @@ trait NonTransparent extends Isometry {
     val newBoard = new Board(layout)
     (newBoard, updatedHighlighted)
   }
+  abstract override def inverse: Isometry = {
+    val baseInverse = super.inverse
+    baseInverse match {
+      case r: Rotation => new Rotation(r.clockwise) with NonTransparent
+      case a: AxialReflection => new AxialReflection() with NonTransparent
+      case other => other
+    }
+  }
 }

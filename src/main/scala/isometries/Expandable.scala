@@ -52,5 +52,16 @@ trait Expandable extends Isometry {
     (returnBoard, shiftedFields, returnPivot)
 
   }
+  abstract override def inverse: Isometry = {
+    val baseInverse = super.inverse
+    baseInverse match {
+      case r: Rotation         => new Rotation(r.clockwise) with Expandable
+      case a: AxialReflection  => new AxialReflection() with Expandable
+      case other               => other // fallback
+    }
+  }
+
+
+
 
 }

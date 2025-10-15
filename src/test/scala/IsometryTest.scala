@@ -8,6 +8,25 @@ import java.awt.Transparency
 
 class IsometryTest extends AnyFunSuite {
 
+
+  test("Clearing of original fields outside image") {
+    val file = new File("src/test/resources/test-level-isometry-1.txt")
+    val (board, _ , _) = FileController.loadLevelFromFile(file)
+    val highlightedFields = List(((0, 0), true), ((0, 1), false), ((1, 0), true), ((1, 1), true))
+    val pivotField = (2, 2)
+    assert(board.fields(0)(0).getIsMine)
+    assert(!board.fields(0)(1).getIsMine)
+    assert(board.fields(1)(0).getIsMine)
+    assert(board.fields(1)(1).getIsMine)
+
+    val rotation = Rotation()
+    val (newBoard, newhighlightedFields, _, _) = rotation(board, highlightedFields, pivotField, 0)
+    //println(newhighlightedFields)
+    assert(!newBoard.fields(0)(0).getIsMine)
+    assert(!newBoard.fields(0)(1).getIsMine)
+    assert(!newBoard.fields(1)(0).getIsMine)
+    assert(!newBoard.fields(1)(1).getIsMine)
+  }
   // --- Rotation ---
   test("Rotate 90° clockwise ") {
     val file = new File("src/test/resources/test-level-isometry-1.txt")
@@ -21,7 +40,7 @@ class IsometryTest extends AnyFunSuite {
 
     val rotation = Rotation()
     val (newBoard, newhighlightedFields, _, _) = rotation(board, highlightedFields, pivotField, 0)
-    println(newhighlightedFields)
+    //println(newhighlightedFields)
     assert(newBoard.fields(0)(3).getIsMine)
     assert(newBoard.fields(0)(4).getIsMine)
     assert(newBoard.fields(1)(3).getIsMine)
@@ -39,7 +58,7 @@ class IsometryTest extends AnyFunSuite {
 
     val rotation = new Rotation()
     val (newBoard, newhighlightedFields, _, _) = rotation.inverse(board, highlightedFields, pivotField, 0)
-    println(newhighlightedFields)
+    //println(newhighlightedFields)
     assert(newBoard.fields(0)(5).getIsMine)
     assert(newBoard.fields(0)(6).getIsMine)
     assert(newBoard.fields(1)(6).getIsMine)
@@ -60,7 +79,7 @@ class IsometryTest extends AnyFunSuite {
 
     val axialReflection = AxialReflection()
     val (newBoard, newhighlightedFields, _, _) = axialReflection(board, highlightedFields, pivotField, reflection)
-    println(newhighlightedFields)
+    //println(newhighlightedFields)
 
     assert(newBoard.fields(4)(0).getIsMine)
     assert(newBoard.fields(3)(1).getIsMine)
@@ -80,7 +99,7 @@ class IsometryTest extends AnyFunSuite {
 
     val axialReflection = AxialReflection()
     val (newBoard, newhighlightedFields, _, _) = axialReflection(board, highlightedFields, pivotField, reflection)
-    println(newhighlightedFields)
+    //println(newhighlightedFields)
 
     assert(newBoard.fields(1)(4).getIsMine)
     assert(newBoard.fields(1)(3).getIsMine)
@@ -100,7 +119,7 @@ class IsometryTest extends AnyFunSuite {
 
     val axialReflection = AxialReflection()
     val (newBoard, newhighlightedFields, _, _) = axialReflection(board, highlightedFields, pivotField, reflection)
-    println(newhighlightedFields)
+    //println(newhighlightedFields)
     assert(newBoard.fields(4)(6).getIsMine)
     assert(newBoard.fields(3)(6).getIsMine)
     assert(newBoard.fields(4)(5).getIsMine)
@@ -119,34 +138,16 @@ class IsometryTest extends AnyFunSuite {
 
     val axialReflection = AxialReflection()
     val (newBoard, newhighlightedFields, _, _) = axialReflection(board, highlightedFields, pivotField, reflection)
-    println(newhighlightedFields)
+    //println(newhighlightedFields)
 
     assert(newBoard.fields(4)(4).getIsMine)
     assert(newBoard.fields(3)(3).getIsMine)
     assert(newBoard.fields(4)(4).getIsMine)
     assert(!newBoard.fields(3)(4).getIsMine)
   }
-  test("Clearing of original fields outside image") {
-    val file = new File("src/test/resources/test-level-isometry-1.txt")
-    val (board, _ , _) = FileController.loadLevelFromFile(file)
-    val highlightedFields = List(((0, 0), true), ((0, 1), false), ((1, 0), true), ((1, 1), true))
-    val pivotField = (2, 2)
-    assert(board.fields(0)(0).getIsMine)
-    assert(!board.fields(0)(1).getIsMine)
-    assert(board.fields(1)(0).getIsMine)
-    assert(board.fields(1)(1).getIsMine)
-
-    val rotation = Rotation()
-    val (newBoard, newhighlightedFields, _, _) = rotation(board, highlightedFields, pivotField, 0)
-    println(newhighlightedFields)
-    assert(!newBoard.fields(0)(0).getIsMine)
-    assert(!newBoard.fields(0)(1).getIsMine)
-    assert(!newBoard.fields(1)(0).getIsMine)
-    assert(!newBoard.fields(1)(1).getIsMine)
-  }
 
   // --- Transparency and Coverage ---
-  test("Transparent isometry overwrites mines correctly") {
+  test("Transparent isometry overwrites mines") {
     val file = new File("src/test/resources/test-level-isometry-3.txt")
     val (board, _ , _) = FileController.loadLevelFromFile(file)
     val highlightedFields = List(((0, 0), true), ((0, 1), false), ((1, 0), true), ((1, 1), true))
@@ -158,13 +159,13 @@ class IsometryTest extends AnyFunSuite {
 
     val rotation = new Rotation() with Transparent
     val (newBoard, newhighlightedFields, _, _) = rotation(board, highlightedFields, pivotField, 0)
-    println(newhighlightedFields)
+    //println(newhighlightedFields)
     assert(newBoard.fields(0)(3).getIsMine)
     assert(newBoard.fields(0)(4).getIsMine)
     assert(newBoard.fields(1)(3).getIsMine)
     assert(!newBoard.fields(1)(4).getIsMine)
   }
-  test("Non-transparent isometry merges target sector") {
+  test("Non-transparent isometry merges mines") {
     val file = new File("src/test/resources/test-level-isometry-3.txt")
     val (board, _ , _) = FileController.loadLevelFromFile(file)
     val highlightedFields = List(((0, 0), true), ((0, 1), false), ((1, 0), true), ((1, 1), true))
@@ -176,7 +177,7 @@ class IsometryTest extends AnyFunSuite {
 
     val rotation = new Rotation() with NonTransparent
     val (newBoard, newhighlightedFields, _, _) = rotation(board, highlightedFields, pivotField, 0)
-    println(newhighlightedFields)
+    //println(newhighlightedFields)
     assert(newBoard.fields(0)(3).getIsMine)
     assert(newBoard.fields(0)(4).getIsMine)
     assert(newBoard.fields(1)(3).getIsMine)
@@ -184,7 +185,7 @@ class IsometryTest extends AnyFunSuite {
   }
 
   // --- Extensibility ---
-  test("Expanding isometries enlarge map correctly") {
+  test("Expanding isometries expands map") {
     val file = new File("src/test/resources/test-level-isometry-2.txt")
     val (board, _ , _) = FileController.loadLevelFromFile(file)
     val highlightedFields = List(((0, 9), true), ((0, 8), false), ((1, 9), true), ((1, 8), true))
@@ -193,11 +194,11 @@ class IsometryTest extends AnyFunSuite {
 
     val axialReflection = new AxialReflection() with Expandable
     val (newBoard, newhighlightedFields, _, _) = axialReflection(board, highlightedFields, pivotField, reflection)
-    println(newhighlightedFields)
+    //println(newhighlightedFields)
     assert(newBoard.rows == board.rows + 1)
     assert(newBoard.cols == board.cols + 1)
   }
-  test("Non-expanding isometries clip out-of-bounds parts") {
+  test("Non-expanding isometries doesn't expand map") {
     val file = new File("src/test/resources/test-level-isometry-2.txt")
     val (board, _ , _) = FileController.loadLevelFromFile(file)
     val highlightedFields = List(((0, 9), true), ((0, 8), false), ((1, 9), true), ((1, 8), true))
@@ -206,7 +207,7 @@ class IsometryTest extends AnyFunSuite {
 
     val axialReflection = new AxialReflection() with NonExpandable
     val (newBoard, newhighlightedFields, _, _) = axialReflection(board, highlightedFields, pivotField, reflection)
-    println(newhighlightedFields)
+    //println(newhighlightedFields)
     assert(newBoard.rows == board.rows)
     assert(newBoard.cols == board.cols)
   }
@@ -226,13 +227,31 @@ class IsometryTest extends AnyFunSuite {
 
     val centralSymmetry = IsometryFunction.centralSymmetry
     val (newBoard, newhighlightedFields, _, _) = centralSymmetry(board, highlightedFields, pivotField, reflection)
-    println(newhighlightedFields)
+    //println(newhighlightedFields)
     assert(newBoard.fields(4)(5).getIsMine)
     assert(!newBoard.fields(4)(6).getIsMine)
     assert(newBoard.fields(3)(5).getIsMine)
     assert(newBoard.fields(3)(6).getIsMine)
   }
-  test("Translation") {}
+  test("Translation") {
+    val file = new File("src/test/resources/test-level-isometry-1.txt")
+    val (board, _ , _) = FileController.loadLevelFromFile(file)
+    val highlightedFields = List(((0, 0), true), ((0, 1), false), ((1, 0), true), ((1, 1), true))
+    val pivotField = (2, 2)
+    val reflection = 1
+    assert(board.fields(0)(0).getIsMine)
+    assert(!board.fields(0)(1).getIsMine)
+    assert(board.fields(1)(0).getIsMine)
+    assert(board.fields(1)(1).getIsMine)
+
+    val translation = IsometryFunction.translateRight(pivotField)
+    val (newBoard, _, _, _) = translation(board, highlightedFields, pivotField, reflection)
+
+    assert(newBoard.fields(0)(2).getIsMine)
+    assert(!newBoard.fields(0)(3).getIsMine)
+    assert(newBoard.fields(1)(2).getIsMine)
+    assert(newBoard.fields(1)(3).getIsMine)
+  }
 
 
   // --- Inverse and Quasi-Inverse ---

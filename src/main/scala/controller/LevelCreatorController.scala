@@ -7,7 +7,8 @@ object LevelCreatorController {
 
 
   def addRow(board: Board): Board = {
-    new Board(board.getLayout(true) :+ List.fill(board.cols)("-"))
+      new Board(board.getLayout(true) :+ List.fill(board.cols)("-"))
+
 
   }
   def addColumn(board: Board): Board = {
@@ -15,10 +16,14 @@ object LevelCreatorController {
 
   }
   def deleteRow(board: Board): Board = {
-    new Board(board.getLayout(true).dropRight(1))
+    if (board.rows > 1)
+      new Board(board.getLayout(true).dropRight(1))
+    else board
   }
   def deleteColumn(board: Board): Board = {
-    new Board(board.getLayout(true).map(_.dropRight(1)))
+    if (board.cols > 1)
+      new Board(board.getLayout(true).map(_.dropRight(1)))
+    else board
   }
 
   def selectField(board: Board, fieldSelected: Field): Unit = {
