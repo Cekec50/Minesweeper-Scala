@@ -104,7 +104,7 @@ object FileController {
     }.toList.sortBy(-_._2) // descending
   }
 
-  /** Save a new score */
+
   def saveScore(name: String, score: Int, filename: String): Unit = {
     val file = new java.io.File(filename)
     val writer = new java.io.FileWriter(file, true) // `true` for append mode

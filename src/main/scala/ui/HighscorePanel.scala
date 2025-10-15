@@ -7,14 +7,13 @@ import scala.swing.event.ButtonClicked
 
 class HighscorePanel(frame: MainFrameUI) extends BorderPanel {
   preferredSize = new Dimension(500, 700)
-  // Top label
+
   private val title = new Label("Highscores") {
     font = new java.awt.Font("Arial", java.awt.Font.BOLD, 18)
   }
 
   private val backButton = new Button("Back")
 
-  // Scores container
   private val scoresPanel = new BoxPanel(Orientation.Vertical)
 
   layout(title) = BorderPanel.Position.North
@@ -24,7 +23,6 @@ class HighscorePanel(frame: MainFrameUI) extends BorderPanel {
   // Refresh leaderboard whenever the panel is shown
   updateScores()
 
-  /** Refresh leaderboard view */
   private def updateScores(): Unit = {
     scoresPanel.contents.clear()
 

@@ -25,7 +25,6 @@ class MenuPanel(frame: MainFrameUI) extends BoxPanel(Orientation.Vertical) {
     case _ =>
   }
 
-
   private def makeMenuButton(text: String, action: () => Unit): Button = {
     val btn = new Button(text) {
       preferredSize = new Dimension(400, 50)

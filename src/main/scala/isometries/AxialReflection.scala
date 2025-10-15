@@ -1,4 +1,5 @@
 package isometries
+import controller.LevelCreatorController
 import model.Board
 
 case class AxialReflection(pivot: (Int, Int) = (0, 0)) extends Isometry {
@@ -25,16 +26,8 @@ case class AxialReflection(pivot: (Int, Int) = (0, 0)) extends Isometry {
       }
       ((x2, y2), value)
     }
-    val highlightedMap = newHighlighedFields.toMap
+    val newBoard = LevelCreatorController.updateBoardWithHighlightedFields(board, newHighlighedFields)
 
-    val newBoard = new Board(board.fields.zipWithIndex.map { case (row, i) =>
-      row.zipWithIndex.map { case (elem, j) =>
-        highlightedMap.get((i, j)) match {
-          case Some(true)  => "#" // mine field
-          case _           => "-" // normal field (false or not included)
-        }
-      }
-    })
     (newBoard, newHighlighedFields, pivotField, reflection)
   }
 

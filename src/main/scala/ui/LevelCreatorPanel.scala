@@ -184,14 +184,11 @@ class LevelCreatorPanel(frame: MainFrameUI) extends BorderPanel {
     board.fields(newPivotField._1)(newPivotField._2).enabled = false
   }
 
-
-  // === Layout ===
   layout(title)   = Position.North
   layout(westBox) = Position.West
   layout(buttonBar) = Position.South
   layout(board)   = Position.Center
 
-  // === Events ===
   listenTo(addRowButton, addColumnButton, deleteRowButton, deleteColumnButton, toggleMineButton, clearAreaButton)
   listenTo(applyButton, inverseButton)
   listenTo(saveLevelButton, backButton)

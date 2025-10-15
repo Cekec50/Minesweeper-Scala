@@ -7,7 +7,7 @@ import model.Board
 import java.io.File
 
 class MainFrameUI extends MainFrame {
-  // Panels
+
   private val menuPanel: MenuPanel = new MenuPanel(this)
   private val difficultyChooserPanel : DifficultyChooserPanel = new DifficultyChooserPanel(this)
   private var gamePanel: GamePanel = _
@@ -17,8 +17,6 @@ class MainFrameUI extends MainFrame {
   title = "Minesweeper"
   //preferredSize = new Dimension(500, 500)
   contents = menuPanel
-
-
 
   def chooseDifficulty(): Unit = {
     contents = difficultyChooserPanel
@@ -35,8 +33,6 @@ class MainFrameUI extends MainFrame {
       case e: IllegalArgumentException => println(e.getMessage)
     }
   }
-
-
 
   def showMenu(): Unit = {
     contents = menuPanel

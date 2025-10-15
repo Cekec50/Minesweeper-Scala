@@ -46,18 +46,18 @@ object LevelCreatorController {
     })
   }
 
-  def setMinesElseClear(board: Board, highlightedFields: List[((Int, Int), Boolean)]): Board = {
-    val highlightedMap = highlightedFields.toMap // (i, j) -> Boolean for O(1) lookup
-
-    new Board(board.fields.zipWithIndex.map { case (row, i) =>
-      row.zipWithIndex.map { case (elem, j) =>
-        highlightedMap.get((i, j)) match {
-          case Some(true)  => "#" // mine field
-          case _           => "-" // normal field (false or not included)
-        }
-      }
-    })
-  }
+//  def setMinesElseClear(board: Board, highlightedFields: List[((Int, Int), Boolean)]): Board = {
+//    val highlightedMap = highlightedFields.toMap // (i, j) -> Boolean for O(1) lookup
+//
+//    new Board(board.fields.zipWithIndex.map { case (row, i) =>
+//      row.zipWithIndex.map { case (elem, j) =>
+//        highlightedMap.get((i, j)) match {
+//          case Some(true)  => "#" // mine field
+//          case _           => "-" // normal field (false or not included)
+//        }
+//      }
+//    })
+//  }
 
   def clearArea(board: Board, highlightedFields: List[((Int, Int), Boolean)]): Board = {
     new Board(board.fields.zipWithIndex.map { case (row, i) =>
