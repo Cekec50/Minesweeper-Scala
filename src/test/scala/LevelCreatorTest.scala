@@ -4,7 +4,6 @@ import org.scalatest.BeforeAndAfter
 import org.scalatest.funsuite.AnyFunSuite
 
 import java.io.File
-import scala.io.Source
 
 class LevelCreatorTest extends AnyFunSuite with BeforeAndAfter{
   var board: Board = _
